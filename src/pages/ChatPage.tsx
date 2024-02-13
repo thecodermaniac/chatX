@@ -30,7 +30,9 @@ const ChatPage: React.FC = () => {
   };
 
   useEffect(() => {
-    ws.current = new WebSocket(`ws://${location.hostname}:8080`);
+    console.log(import.meta.env.VITE_CHAT_ENDPOINT);
+    
+    ws.current = new WebSocket(import.meta.env.VITE_CHAT_ENDPOINT);
     ws.current.onopen = () => {
       console.log("Connection Opened");
       setConnectionOpen(true);
