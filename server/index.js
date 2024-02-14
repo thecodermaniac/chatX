@@ -1,4 +1,4 @@
-const WebSocket = require("ws");
+import { WebSocketServer } from "ws";
 
 const users = new Set();
 
@@ -7,31 +7,25 @@ function sendMessage(message) {
     user.ws.send(JSON.stringify(message));
   });
 }
-console.log(Date.now());
-const server = new WebSocket.Server(
+const server = new WebSocketServer(
   {
     port: 8080,
   },
   () => {
-    console.log("Server started on port 8082");
+    console.log("Server started on port 8080");
   }
 );
 
 server.on("connection", (ws) => {
-  console.log("ws", ws);
   const userRef = {
     ws,
   };
   users.add(userRef);
-  console.log("users", users);
 
   ws.on("message", (message) => {
-    console.log(message);
     try {
       // Parsing the message
-      console.log("msg", message);
       const data = JSON.parse(message);
-      console.log("real", data);
       // Checking if the message is a valid one
 
       if (typeof data.sender !== "string" || typeof data.body !== "string") {

@@ -31,7 +31,7 @@ const ChatPage: React.FC = () => {
 
   useEffect(() => {
     console.log(import.meta.env.VITE_CHAT_ENDPOINT);
-    
+
     ws.current = new WebSocket(import.meta.env.VITE_CHAT_ENDPOINT);
     ws.current.onopen = () => {
       console.log("Connection Opened");
@@ -58,14 +58,17 @@ const ChatPage: React.FC = () => {
 
   return (
     <Layouts>
-      <div id="chat-view-container" className="flex flex-col w-1/3">
+      <div
+        id="chat-view-container"
+        className="flex flex-col md:w-2/3 lg:w-1/3 w-full px-4  overflow-y-auto"
+      >
         {messages.map((message, index) => (
           <div
             key={index}
-            className={`my-3 rounded py-3 w-1/3 text-white ${
+            className={`my-3 rounded py-3 px-2 w-fit text-white ${
               message.sender === username
-                ? "self-end bg-purple-600"
-                : "bg-blue-600"
+                ? "self-end bg-lime-600"
+                : "bg-sky-600"
             }`}
           >
             <div className="flex items-center">
@@ -91,7 +94,7 @@ const ChatPage: React.FC = () => {
         ))}
         <div ref={scrollTarget}></div>
       </div>
-      <footer className="w-1/3">
+      <footer className="pb-5 md:w-2/3 lg:w-1/3 w-full px-4">
         <p>
           You are chatting as <span className="font-bold">{username}</span>
         </p>
