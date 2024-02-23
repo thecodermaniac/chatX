@@ -7,7 +7,7 @@ const App = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LoginPage />} />
-        <Route path="/chat/:username" element={<ChatPage />} />
+        <Route path="/chat/:username/:roomname" element={<ChatPage />} />
       </Routes>
     </BrowserRouter>
   );
