@@ -14,7 +14,10 @@ const ChatPage: React.FC = () => {
   const [isConnectionOpen, setConnectionOpen] = useState<boolean>(false);
   const [messageBody, setMessageBody] = useState<string>("");
 
-  const { username, roomname } = useParams<{ username: string; roomname: string }>();
+  const { username, roomname } = useParams<{
+    username: string;
+    roomname: string;
+  }>();
   const ws = useRef<WebSocket | null>(null);
 
   const sendMessage = () => {
@@ -45,17 +48,17 @@ const ChatPage: React.FC = () => {
       console.log("fun", event);
       const data = JSON.parse(event.data) as Message;
       setMessages((prevState) => {
-        if (prevState[roomname]) {
+        if (prevState[roomname as string]) {
           // If the key already exists, add the new value to the existing array
           return {
             ...prevState,
-            [roomname]: [...prevState[roomname], data],
+            [roomname as string]: [...prevState[roomname as string], data],
           };
         } else {
           // If the key does not exist, create a new array with the new value
           return {
             ...prevState,
-            [roomname]: [data],
+            [roomname as string]: [data],
           };
         }
       });
@@ -72,7 +75,7 @@ const ChatPage: React.FC = () => {
     if (scrollTarget.current) {
       scrollTarget.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages[roomname]?.length]);
+  }, [messages[roomname as string]?.length]);
 
   return (
     <Layouts>
@@ -80,7 +83,7 @@ const ChatPage: React.FC = () => {
         id="chat-view-container"
         className="flex flex-col md:w-2/3 lg:w-1/3 w-full px-4  overflow-y-auto"
       >
-        {messages[roomname]?.map((message, index) => (
+        {messages[roomname as string]?.map((message: any, index: number) => (
           <div
             key={index}
             className={`my-3 rounded py-3 px-2 w-fit text-white ${
@@ -97,12 +100,9 @@ const ChatPage: React.FC = () => {
                   </div>
                   <div className="ml-1">
                     <div className="text-sm font-bold leading-5 text-gray-900">
-                      {new Date(message.sentAt).toLocaleTimeString(
-                        undefined,
-                        {
-                          timeStyle: "short",
-                        }
-                      )}{" "}
+                      {new Date(message.sentAt).toLocaleTimeString(undefined, {
+                        timeStyle: "short",
+                      })}{" "}
                     </div>
                   </div>
                 </div>
