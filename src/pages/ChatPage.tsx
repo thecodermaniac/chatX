@@ -7,6 +7,7 @@ interface Message {
   sender: string;
   body: string;
   sentAt: string; // Assuming sentAt is a string for simplicity
+  room: string;
 }
 
 const ChatPage: React.FC = () => {
@@ -15,6 +16,7 @@ const ChatPage: React.FC = () => {
   const [messageBody, setMessageBody] = useState<string>("");
 
   const { username } = useParams<{ username: string }>();
+  const { roomname } = useParams<{ roomname: string }>();
   const ws = useRef<WebSocket | null>(null);
 
   const sendMessage = () => {
@@ -23,6 +25,7 @@ const ChatPage: React.FC = () => {
         JSON.stringify({
           sender: username,
           body: messageBody,
+          room: roomname,
         })
       );
       setMessageBody("");
@@ -36,6 +39,9 @@ const ChatPage: React.FC = () => {
     ws.current.onopen = () => {
       console.log("Connection Opened");
       setConnectionOpen(true);
+
+      ws.current?.send(JSON.stringify({ initial: true, room: roomname }));
+      setMessages([]);
     };
     ws.current.onmessage = (event) => {
       console.log("fun", event);
@@ -44,9 +50,9 @@ const ChatPage: React.FC = () => {
     };
     return () => {
       console.log("Cleaning up...");
-      ws.current?.close();
+      ws.current?.close(3001, JSON.stringify({ room: roomname }));
     };
-  }, []);
+  }, [roomname]);
 
   const scrollTarget = useRef<HTMLDivElement>(null);
 

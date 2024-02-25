@@ -1,19 +1,23 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import closeIcon from "../assets/close.png";
 import menuIcon from "../assets/menu.png";
 import CreateChatModal from "./CreateChatModal";
+import useUser from "../context/UserProvider";
 const Layouts: React.FC<LayoutProps> = ({ children }) => {
+  const { name } = useUser();
+  console.log("name", name);
+
   const navigate = useNavigate();
+  const location = useLocation();
   const [open, setOpen] = useState(true);
   const [modalOpen, setModal] = useState(false);
   const [rooms, setRoom] = useState([
     { name: "Global", value: "global" },
     { name: "Custom", value: "custom" },
   ]);
-  const username = "Aritra";
   function navigateToChat(roomName: string) {
-    navigate(`/chat/${username}/${roomName}`);
+    navigate(`/chat/${name}/${roomName}`);
   }
 
   function newChat(roomName: string) {
@@ -26,53 +30,57 @@ const Layouts: React.FC<LayoutProps> = ({ children }) => {
         setModal={setModal}
         openModal={modalOpen}
       />
-      <img
-        src={menuIcon}
-        className="w-6 h-6 absolute top-3 left-4 z-10"
-        onClick={() => {
-          setOpen(true);
-        }}
-      />
-      <div
-        className={`absolute h-[100vh] left-3 transition-all overflow-hidden z-20 bg-white ${
-          open ? "w-[20%]" : "w-0"
-        }`}
-      >
+      {location.pathname !== "/" && (
         <img
-          src={closeIcon}
-          className="w-6 h-6"
+          src={menuIcon}
+          className="w-6 h-6 absolute top-3 left-4 z-10"
           onClick={() => {
-            setOpen(false);
+            setOpen(true);
           }}
         />
-        <div className="flex flex-col gap-3 divide-y-2 my-3 ">
-          {rooms.map((val, ind) => {
-            return (
-              <div
-                className="w-full px-2 py-3 flex flex-row items-center justify-between"
-                key={ind}
-                onClick={() => {
-                  navigateToChat(val.value);
-                }}
-              >
-                <p className=" rounded-[100%] bg-cyan-900 w-10 h-10 text-white flex items-center justify-center">
-                  {val.name[0]}
-                </p>
-                <p className="p-1">{val.name}</p>
-              </div>
-            );
-          })}
-        </div>
-
-        <button
-          className="w-full py-3 border-4 border-gray-500 rounded-xl"
-          onClick={() => {
-            setModal(true);
-          }}
+      )}
+      {location.pathname !== "/" && (
+        <div
+          className={`absolute h-[100vh] left-3 transition-all overflow-hidden z-20 bg-white ${
+            open ? "w-[20%]" : "w-0"
+          }`}
         >
-          New Chat +
-        </button>
-      </div>
+          <img
+            src={closeIcon}
+            className="w-6 h-6"
+            onClick={() => {
+              setOpen(false);
+            }}
+          />
+          <div className="flex flex-col gap-3 divide-y-2 my-3 ">
+            {rooms.map((val, ind) => {
+              return (
+                <div
+                  className="w-full px-2 py-3 flex flex-row items-center justify-between"
+                  key={ind}
+                  onClick={() => {
+                    navigateToChat(val.value);
+                  }}
+                >
+                  <p className=" rounded-[100%] bg-cyan-900 w-10 h-10 text-white flex items-center justify-center">
+                    {val.name[0]}
+                  </p>
+                  <p className="p-1">{val.name}</p>
+                </div>
+              );
+            })}
+          </div>
+
+          <button
+            className="w-full py-3 border-4 border-gray-500 rounded-xl"
+            onClick={() => {
+              setModal(true);
+            }}
+          >
+            New Chat +
+          </button>
+        </div>
+      )}
       <h2 className="text-3xl font-bold">ChatX</h2>
       {children}
     </div>

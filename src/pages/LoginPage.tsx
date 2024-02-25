@@ -1,12 +1,14 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layouts from "../components/Layouts";
+import useUser from "../context/UserProvider";
 const LoginPage = () => {
+  const { name, updateValue } = useUser();
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
   function handleSubmit() {
-    if (username) {
-      navigate(`/chat/${username}`);
+    console.log(name);
+
+    if (name !== "") {
+      navigate(`/chat/${name}/global`);
     }
   }
   return (
@@ -24,8 +26,8 @@ const LoginPage = () => {
             id="username"
             type="text"
             placeholder="Your name or nickname"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={name}
+            onChange={(e) => updateValue(e.target.value)}
             required
           />
         </div>
