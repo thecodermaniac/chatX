@@ -6,17 +6,15 @@ import sendIcon from "../components/sendIcon";
 interface Message {
   sender: string;
   body: string;
-  sentAt: string; // Assuming sentAt is a string for simplicity
-  room: string;
+  sentAt: string;
 }
 
 const ChatPage: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<{ [key: string]: Message[] }>({});
   const [isConnectionOpen, setConnectionOpen] = useState<boolean>(false);
   const [messageBody, setMessageBody] = useState<string>("");
 
-  const { username } = useParams<{ username: string }>();
-  const { roomname } = useParams<{ roomname: string }>();
+  const { username, roomname } = useParams<{ username: string; roomname: string }>();
   const ws = useRef<WebSocket | null>(null);
 
   const sendMessage = () => {
@@ -41,12 +39,26 @@ const ChatPage: React.FC = () => {
       setConnectionOpen(true);
 
       ws.current?.send(JSON.stringify({ initial: true, room: roomname }));
-      setMessages([]);
+      // setMessages([]);
     };
     ws.current.onmessage = (event) => {
       console.log("fun", event);
       const data = JSON.parse(event.data) as Message;
-      setMessages((_messages) => [..._messages, data]);
+      setMessages((prevState) => {
+        if (prevState[roomname]) {
+          // If the key already exists, add the new value to the existing array
+          return {
+            ...prevState,
+            [roomname]: [...prevState[roomname], data],
+          };
+        } else {
+          // If the key does not exist, create a new array with the new value
+          return {
+            ...prevState,
+            [roomname]: [data],
+          };
+        }
+      });
     };
     return () => {
       console.log("Cleaning up...");
@@ -60,7 +72,7 @@ const ChatPage: React.FC = () => {
     if (scrollTarget.current) {
       scrollTarget.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages.length]);
+  }, [messages[roomname]?.length]);
 
   return (
     <Layouts>
@@ -68,7 +80,7 @@ const ChatPage: React.FC = () => {
         id="chat-view-container"
         className="flex flex-col md:w-2/3 lg:w-1/3 w-full px-4  overflow-y-auto"
       >
-        {messages.map((message, index) => (
+        {messages[roomname]?.map((message, index) => (
           <div
             key={index}
             className={`my-3 rounded py-3 px-2 w-fit text-white ${
@@ -85,9 +97,12 @@ const ChatPage: React.FC = () => {
                   </div>
                   <div className="ml-1">
                     <div className="text-sm font-bold leading-5 text-gray-900">
-                      {new Date(message.sentAt).toLocaleTimeString(undefined, {
-                        timeStyle: "short",
-                      })}{" "}
+                      {new Date(message.sentAt).toLocaleTimeString(
+                        undefined,
+                        {
+                          timeStyle: "short",
+                        }
+                      )}{" "}
                     </div>
                   </div>
                 </div>

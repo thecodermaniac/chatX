@@ -12,10 +12,7 @@ const Layouts: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const [open, setOpen] = useState(true);
   const [modalOpen, setModal] = useState(false);
-  const [rooms, setRoom] = useState([
-    { name: "Global", value: "global" },
-    { name: "Custom", value: "custom" },
-  ]);
+  const [rooms, setRoom] = useState([{ name: "Global", value: "global" }]);
   function navigateToChat(roomName: string) {
     navigate(`/chat/${name}/${roomName}`);
   }
@@ -41,18 +38,18 @@ const Layouts: React.FC<LayoutProps> = ({ children }) => {
       )}
       {location.pathname !== "/" && (
         <div
-          className={`absolute h-[100vh] left-3 transition-all overflow-hidden z-20 bg-white ${
-            open ? "w-[20%]" : "w-0"
+          className={`absolute h-[100vh] left-0 transition-all overflow-hidden z-20 bg-white border-r-4 rounded-xl px-4 ${
+            open ? "lg:w-[20%] md:w-[40%] w-[60%]" : "w-0 border-r-0 px-0"
           }`}
         >
           <img
             src={closeIcon}
-            className="w-6 h-6"
+            className="absolute w-7 h-7 right-4 mb-4 hover:cursor-pointer"
             onClick={() => {
               setOpen(false);
             }}
           />
-          <div className="flex flex-col gap-3 divide-y-2 my-3 ">
+          <div className="flex flex-col gap-3 divide-y-2 mt-6">
             {rooms.map((val, ind) => {
               return (
                 <div
@@ -72,7 +69,7 @@ const Layouts: React.FC<LayoutProps> = ({ children }) => {
           </div>
 
           <button
-            className="w-full py-3 border-4 border-gray-500 rounded-xl"
+            className="w-full py-3 border-4 border-gray-500 rounded-xl mt-5"
             onClick={() => {
               setModal(true);
             }}
