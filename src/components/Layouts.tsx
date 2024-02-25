@@ -38,8 +38,8 @@ const Layouts: React.FC<LayoutProps> = ({ children }) => {
       )}
       {location.pathname !== "/" && (
         <div
-          className={`absolute h-[100vh] left-0 transition-all overflow-hidden z-20 bg-white border-r-4 rounded-xl px-4 ${
-            open ? "lg:w-[20%] md:w-[40%] w-[60%]" : "w-0 border-r-0 px-0"
+          className={`absolute h-[100vh] left-0 transition-all overflow-hidden z-20 bg-white border-r-4 rounded-xl ${
+            open ? "lg:w-[20%] md:w-[40%] w-[60%] px-4" : "w-0 border-r-0 px-0"
           }`}
         >
           <img
