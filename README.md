@@ -16,5 +16,6 @@ npm install
 npm run dev
 ```
 
-screenshot
-![image](https://github.com/thecodermaniac/chatX/assets/79108244/fd83fade-5e4b-4737-9b39-d218e60e6d10)
+### Screenshot
+![image](https://github.com/thecodermaniac/chatX/assets/79108244/d8add68c-7739-463c-87ea-9b4085135ee8)
+
