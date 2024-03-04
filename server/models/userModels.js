@@ -10,6 +10,8 @@ const userSchema = new mongoose.Schema({
   userId: { type: String },
 });
 
+userSchema.index({ userId: 1 });
+
 userSchema.pre("save", function (next) {
   this.userId = nanoid(10);
   const salt = bycrypt.genSaltSync(Number(process.env.ROUNDS));
