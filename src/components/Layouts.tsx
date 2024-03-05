@@ -5,8 +5,8 @@ import menuIcon from "../assets/menu.png";
 import CreateChatModal from "./CreateChatModal";
 import useUser from "../context/UserProvider";
 const Layouts: React.FC<LayoutProps> = ({ children }) => {
-  const { name } = useUser();
-  console.log("name", name);
+  const { User } = useUser();
+  console.log("name", User.userName);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -14,7 +14,7 @@ const Layouts: React.FC<LayoutProps> = ({ children }) => {
   const [modalOpen, setModal] = useState(false);
   const [rooms, setRoom] = useState([{ name: "Global", value: "global" }]);
   function navigateToChat(roomName: string) {
-    navigate(`/chat/${name}/${roomName}`);
+    navigate(`/chat/${User.userName}/${roomName}`);
   }
 
   function newChat(roomName: string) {

@@ -1,8 +1,11 @@
 import { useContext, createContext, useState } from "react";
 
+interface DynamicObject {
+  [key: string]: any;
+}
 interface userType {
-  name: string;
-  updateValue: (newValue: string) => void;
+  User: DynamicObject;
+  setUser: React.Dispatch<React.SetStateAction<DynamicObject>>;
 }
 
 interface ProviderProps {
@@ -19,14 +22,10 @@ const useUser = (): userType => {
 };
 
 export const UserProvider: React.FC<ProviderProps> = ({ children }) => {
-  const [name, setName] = useState<string>("");
-
-  const updateValue = (newValue: string) => {
-    setName(newValue);
-  };
+  const [User, setUser] = useState<Object>({});
 
   return (
-    <userContext.Provider value={{ name, updateValue }}>
+    <userContext.Provider value={{ User, setUser }}>
       {children}
     </userContext.Provider>
   );
