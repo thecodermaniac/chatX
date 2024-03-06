@@ -6,6 +6,8 @@ interface DynamicObject {
 interface userType {
   User: DynamicObject;
   setUser: React.Dispatch<React.SetStateAction<DynamicObject>>;
+  Receiver: string;
+  setReceiver: React.Dispatch<React.SetStateAction<string>>;
 }
 
 interface ProviderProps {
@@ -23,9 +25,10 @@ const useUser = (): userType => {
 
 export const UserProvider: React.FC<ProviderProps> = ({ children }) => {
   const [User, setUser] = useState<Object>({});
+  const [Receiver, setReceiver] = useState("");
 
   return (
-    <userContext.Provider value={{ User, setUser }}>
+    <userContext.Provider value={{ User, setUser, Receiver, setReceiver }}>
       {children}
     </userContext.Provider>
   );

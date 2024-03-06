@@ -6,8 +6,9 @@ import CreateChatModal from "./CreateChatModal";
 import useUser from "../context/UserProvider";
 import { getNames } from "../utils/getName";
 import useAxios from "../useAxios";
+import UserSection from "./UserSection";
 const Layouts: React.FC<LayoutProps> = ({ children }) => {
-  const { User } = useUser();
+  const { User, setReceiver } = useUser();
   console.log("name", User.userName);
   // getNames(array, User.userName);
   const navigate = useNavigate();
@@ -31,11 +32,15 @@ const Layouts: React.FC<LayoutProps> = ({ children }) => {
         console.log(response.data);
         const userList = getNames(response.data.list, User.userName);
         console.log(userList);
-        setRoom(rooms.concat(userList));
+        setRoom([...rooms, ...userList]);
       });
   }, []);
   return (
-    <div className="w-full h-screen flex flex-col justify-center items-center space-y-6">
+    <div className="w-full h-[100vh] flex flex-col items-center space-y-6">
+      <nav className="flex justify-between w-full">
+        <h2 className="text-3xl font-bold mx-auto">ChatX</h2>
+        <UserSection />
+      </nav>
       <CreateChatModal
         createChat={newChat}
         setModal={setModal}
@@ -71,6 +76,7 @@ const Layouts: React.FC<LayoutProps> = ({ children }) => {
                   key={ind}
                   onClick={() => {
                     navigateToChat(val.value);
+                    setReceiver(val.name);
                   }}
                 >
                   <p className=" rounded-[100%] bg-cyan-900 w-10 h-10 text-white flex items-center justify-center">
@@ -92,7 +98,7 @@ const Layouts: React.FC<LayoutProps> = ({ children }) => {
           </button>
         </div>
       )}
-      <h2 className="text-3xl font-bold">ChatX</h2>
+
       {children}
     </div>
   );

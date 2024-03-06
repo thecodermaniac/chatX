@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Layouts from "../components/Layouts";
 import { useParams } from "react-router-dom";
 import sendIcon from "../components/sendIcon";
+import useUser from "../context/UserProvider";
 
 interface Message {
   sender: string;
@@ -10,6 +11,7 @@ interface Message {
 }
 
 const ChatPage: React.FC = () => {
+  const { Receiver } = useUser();
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>({});
   const [isConnectionOpen, setConnectionOpen] = useState<boolean>(false);
   const [messageBody, setMessageBody] = useState<string>("");
@@ -79,6 +81,7 @@ const ChatPage: React.FC = () => {
 
   return (
     <Layouts>
+      <h2 className="text-3xl font-bold">{Receiver}</h2>
       <div
         id="chat-view-container"
         className="flex flex-col md:w-2/3 lg:w-1/3 w-full px-4  overflow-y-auto"
