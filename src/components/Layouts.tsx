@@ -1,15 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import closeIcon from "../assets/close.png";
 import menuIcon from "../assets/menu.png";
 import CreateChatModal from "./CreateChatModal";
 import useUser from "../context/UserProvider";
+import { getNames } from "../utils/getName";
+import useAxios from "../useAxios";
 const Layouts: React.FC<LayoutProps> = ({ children }) => {
   const { User } = useUser();
   console.log("name", User.userName);
-
+  // getNames(array, User.userName);
   const navigate = useNavigate();
   const location = useLocation();
+
   const [open, setOpen] = useState(true);
   const [modalOpen, setModal] = useState(false);
   const [rooms, setRoom] = useState([{ name: "Global", value: "global" }]);
@@ -20,6 +23,17 @@ const Layouts: React.FC<LayoutProps> = ({ children }) => {
   function newChat(roomName: string) {
     setRoom([...rooms, { name: roomName, value: roomName.toLowerCase() }]);
   }
+
+  useEffect(() => {
+    useAxios
+      .get(`/api/user/get-connection/${User.userId}`)
+      .then(function (response) {
+        console.log(response.data);
+        const userList = getNames(response.data.list, User.userName);
+        console.log(userList);
+        setRoom(rooms.concat(userList));
+      });
+  }, []);
   return (
     <div className="w-full h-screen flex flex-col justify-center items-center space-y-6">
       <CreateChatModal
