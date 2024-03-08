@@ -49,15 +49,14 @@ export async function UserRegister(req, res) {
 
 export async function CreateConnection(req, res) {
   try {
-    const oldConnect = await Connect.find({
-      $or: [
-        { user1Id: req.body.sender },
-        { user2Id: req.body.receiver },
-        { user2Id: req.body.sender },
-        { user1Id: req.body.receiver },
-      ],
+    const oldConnect1 = await Connect.find({
+      $and: [{ user1Id: req.body.sender }, { user2Id: req.body.receiver }],
     });
-    if (oldConnect) {
+    const oldConnect2 = await Connect.find({
+      $and: [{ user2Id: req.body.sender }, { user1Id: req.body.receiver }],
+    });
+    console.log(oldConnect1.length || oldConnect2.length !== 0);
+    if (oldConnect1.length || oldConnect2.length !== 0) {
       const error = new Error("Connection already exits");
       error.code = 409;
       throw error;
@@ -84,6 +83,7 @@ export async function getConnection(req, res) {
       {
         $match: {
           $or: [{ user1Id: specificUserId }, { user2Id: specificUserId }],
+          isaccept: true,
         },
       },
       {
@@ -124,6 +124,62 @@ export async function getConnection(req, res) {
     ]);
 
     res.status(200).send({ list: list });
+  } catch (error) {
+    res.status(500 || error.code).send({ message: error.message });
+  }
+}
+
+export async function getRequestList(req, res) {
+  try {
+    const user2 = req.params.usId;
+    const reqList = await Connect.aggregate([
+      {
+        $match: {
+          $and: [{ user2Id: user2 }, { isaccept: false }],
+        },
+      },
+      {
+        $lookup: {
+          from: "userxes",
+          localField: "user1Id",
+          foreignField: "userId",
+          as: "user1",
+        },
+      },
+      {
+        $unwind: "$user1",
+      },
+      {
+        $project: {
+          _id: 1,
+          user1: {
+            userName: "$user1.userName",
+            userId: "$user1.userId",
+          },
+        },
+      },
+    ]);
+    res.status(200).send({
+      requestList: reqList,
+    });
+  } catch (error) {
+    res.status(500 || error.code).send({ message: error.message });
+  }
+}
+
+export async function acceptRequest(req, res) {
+  try {
+    await Connect.findByIdAndUpdate(req.body.ConId, { isaccept: true });
+    res.status(200).send({ message: "Request accepted" });
+  } catch (error) {
+    res.status(500 || error.code).send({ message: error.message });
+  }
+}
+
+export async function deleteRequest(req, res) {
+  try {
+    await Connect.findByIdAndDelete(req.body.ConId);
+    res.status(200).send({ message: "Request Deleted" });
   } catch (error) {
     res.status(500 || error.code).send({ message: error.message });
   }
