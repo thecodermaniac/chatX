@@ -15,9 +15,9 @@ const UserSection = () => {
         setOpen((prev) => !prev);
       }}
     >
-      <div className="flex flex-row items-center justify-between gap-6 w-full">
+      <div className="flex flex-row items-center justify-between gap-6 w-full hover:cursor-pointer">
         <p className=" rounded-[100%] bg-cyan-900 w-10 h-10 text-white flex items-center justify-center">
-          {User?.userName === undefined ? "X" : User?.userName[0]}
+          {User?.userName === undefined ? "" : User?.userName[0]}
         </p>
         <p className="p-1 text-xl">{User.userName}</p>
       </div>

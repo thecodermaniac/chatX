@@ -8,6 +8,6 @@ router.post("/add-connection", user.CreateConnection);
 router.get("/get-connection/:usId", user.getConnection);
 router.get("/get-req-list/:usId", user.getRequestList);
 router.put("/accept-request", user.acceptRequest);
-router.delete("/reject-request", user.deleteRequest);
+router.post("/reject-request", user.deleteRequest);
 
 export default router;

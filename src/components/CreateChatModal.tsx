@@ -16,7 +16,7 @@ const CreateChatModal: React.FC<CreateChatModal> = ({
         src={closeIcon}
         className="absolute top-2 right-2 w-6 h-6 hover:cursor-pointer"
         onClick={() => {
-          setModal(false);
+          setModal({ type: "changeChat", payload: false });
         }}
       />
       <p className="text-lg">Create or Join room</p>

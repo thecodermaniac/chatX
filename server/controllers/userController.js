@@ -169,7 +169,14 @@ export async function getRequestList(req, res) {
 
 export async function acceptRequest(req, res) {
   try {
-    await Connect.findByIdAndUpdate(req.body.ConId, { isaccept: true });
+    const updateRes = await Connect.findByIdAndUpdate(req.body.ConId, {
+      isaccept: true,
+    });
+    if (!updateRes) {
+      const error = new Error("No such request found");
+      error.code = 404;
+      throw error;
+    }
     res.status(200).send({ message: "Request accepted" });
   } catch (error) {
     res.status(500 || error.code).send({ message: error.message });
@@ -178,7 +185,12 @@ export async function acceptRequest(req, res) {
 
 export async function deleteRequest(req, res) {
   try {
-    await Connect.findByIdAndDelete(req.body.ConId);
+    const deleteRes = await Connect.findByIdAndDelete(req.body.ConId);
+    if (!deleteRes) {
+      const error = new Error("Nothing to reject");
+      error.code = 404;
+      throw error;
+    }
     res.status(200).send({ message: "Request Deleted" });
   } catch (error) {
     res.status(500 || error.code).send({ message: error.message });
