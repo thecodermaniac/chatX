@@ -1,52 +1,50 @@
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useState, useEffect } from "react";
-import useUser from "../context/UserProvider";
 import useAxios from "../useAxios";
-const LoginPage = () => {
-  const { User, setUser, setReceiver } = useUser();
+
+const RegisterPage = () => {
   const navigate = useNavigate();
-  const [login, setLogin] = useState({
+  const [register, setRegister] = useState({
     email: "",
     password: "",
+    name: "",
   });
-  function handleLogin(event: any) {
+
+  function handleRegister(event: any) {
     event.preventDefault();
     useAxios
-      .post("/api/user/login", { ...login })
+      .post("/api/user/register", { ...register })
       .then(function (response) {
-        const loggedUser = response.data;
-        localStorage.setItem("chatX-User", JSON.stringify(response.data));
-        setUser(response.data);
-        console.log(User);
-        navigate(`/chat/${loggedUser.userName}/global`);
+        console.log(response.data.message);
+        navigate("/");
       })
       .catch(function (error) {
-        console.error(error.message);
-      })
-      .finally(function () {
-        console.log("Network Error");
+        console.log(error.message);
       });
   }
-
-  useEffect(() => {
-    let existing = JSON.parse(localStorage.getItem("chatX-User") || "{}");
-    console.log("ki dabi", Object.keys(existing));
-
-    if (Object.keys(existing).length !== 0) {
-      setUser(existing);
-      navigate(`/chat/${existing?.userName}/global`);
-      setReceiver("Global");
-    }
-  }, []);
-
   return (
     <div className="flex flex-col items-center h-screen justify-center">
       <form className="w-full max-w-sm flex flex-col space-y-6">
         <p className="block text-gray-500 font-bold text-center mb-1 md:mb-0 pr-4">
           {" "}
-          Welcome back, User. Please Login
+          Hello! new user. Welcome to ChatX
         </p>
         <div className="flex flex-col items-center mb-6 space-y-6">
+          <label
+            className="block text-gray-500 font-bold mb-1 md:mb-0 pr-4 w-full"
+            htmlFor="email"
+          >
+            Username
+          </label>
+          <input
+            className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
+            id="username"
+            type="text"
+            placeholder="Your name or nickname"
+            value={register.name}
+            onChange={(e) => setRegister({ ...register, name: e.target.value })}
+            required
+          />
           <label
             className="block text-gray-500 font-bold mb-1 md:mb-0 pr-4 w-full"
             htmlFor="email"
@@ -58,8 +56,10 @@ const LoginPage = () => {
             id="username"
             type="text"
             placeholder="Your name or nickname"
-            value={login.email}
-            onChange={(e) => setLogin({ ...login, email: e.target.value })}
+            value={register.email}
+            onChange={(e) =>
+              setRegister({ ...register, email: e.target.value })
+            }
             required
           />
           <label
@@ -73,8 +73,10 @@ const LoginPage = () => {
             id="username"
             type="text"
             placeholder="Your name or nickname"
-            value={login.password}
-            onChange={(e) => setLogin({ ...login, password: e.target.value })}
+            value={register.password}
+            onChange={(e) =>
+              setRegister({ ...register, password: e.target.value })
+            }
             required
           />
         </div>
@@ -85,18 +87,18 @@ const LoginPage = () => {
             className="self-center shadow bg-purple-500 hover:bg-purple-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded"
             type="submit"
             onClick={(e) => {
-              handleLogin(e);
+              handleRegister(e);
             }}
           >
-            Log in the Chat
+            Register Yourself
           </button>
         </div>
       </form>
       <div>
         <p className="mx-auto text-md">
-          New user ?{" "}
-          <Link to={"/register"} className="underline underline-offset-2 ">
-            register
+          Registered user ?{" "}
+          <Link to={"/"} className="underline underline-offset-2 ">
+            login
           </Link>
         </p>
       </div>
@@ -104,4 +106,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default RegisterPage;
