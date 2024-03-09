@@ -16,7 +16,7 @@ const Layouts: React.FC<LayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [{ isSideBarOpen, isChatOpen, isRequestOpen }, modalDispatch] =
-    useReducer(modalReducers, {
+    useReducer<(state: any, actions: any) => any>(modalReducers, {
       isSideBarOpen: true,
       isChatOpen: false,
       isRequestOpen: false,
