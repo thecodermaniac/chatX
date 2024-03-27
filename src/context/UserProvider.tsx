@@ -25,7 +25,7 @@ const useUser = (): userType => {
 
 export const UserProvider: React.FC<ProviderProps> = ({ children }) => {
   const [User, setUser] = useState<Object>({});
-  const [Receiver, setReceiver] = useState("");
+  const [Receiver, setReceiver] = useState("Global");
 
   return (
     <userContext.Provider value={{ User, setUser, Receiver, setReceiver }}>

@@ -84,7 +84,7 @@ const ChatPage: React.FC = () => {
       <h2 className="text-3xl font-bold">{Receiver}</h2>
       <div
         id="chat-view-container"
-        className="flex flex-col md:w-2/3 lg:w-1/3 w-full px-4  overflow-y-auto"
+        className="flex flex-col md:w-2/3 lg:w-1/3 w-full px-4  overflow-y-auto h-screen"
       >
         {messages[roomname as string]?.map((message: any, index: number) => (
           <div

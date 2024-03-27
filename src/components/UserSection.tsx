@@ -9,13 +9,13 @@ const UserSection = () => {
     setUser({});
   }
   return (
-    <div
-      className="w-fit px-2 py-3 flex flex-col"
-      onClick={() => {
-        setOpen((prev) => !prev);
-      }}
-    >
-      <div className="flex flex-row items-center justify-between gap-6 w-full hover:cursor-pointer">
+    <div className="w-fit px-2 py-3 flex flex-col">
+      <div
+        className="flex flex-row items-center justify-between gap-6 w-full hover:cursor-pointer"
+        onClick={() => {
+          setOpen((prev) => !prev);
+        }}
+      >
         <p className=" rounded-[100%] bg-cyan-900 w-10 h-10 text-white flex items-center justify-center">
           {User?.userName === undefined ? "" : User?.userName[0]}
         </p>
