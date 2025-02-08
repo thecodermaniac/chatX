@@ -3,6 +3,7 @@ import Layouts from "../components/Layouts";
 import { useParams } from "react-router-dom";
 import sendIcon from "../components/sendIcon";
 import useUser from "../context/UserProvider";
+import useAxios from "../useAxios";
 
 interface Message {
   sender: string;
@@ -10,8 +11,34 @@ interface Message {
   sentAt: string;
 }
 
+interface PushSubscription {
+  endpoint: string;
+  expirationTime: number | null;
+}
+
+interface SubscriptionPayload {
+  userId: string;
+  subscription: PushSubscription;
+}
+
+async function subscribeToPush(userId: string): Promise<void> {
+  const registration: ServiceWorkerRegistration =
+    await navigator.serviceWorker.register("/sw.js");
+
+  const subscription: PushSubscription =
+    await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: import.meta.env.VITE_VAPID_KEY_PUBLIC,
+    });
+
+  const payload: SubscriptionPayload = { userId, subscription };
+  await useAxios.post("/subscribe", payload, {
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
 const ChatPage: React.FC = () => {
-  const { Receiver } = useUser();
+  const { Receiver, User } = useUser();
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>({});
   const [isConnectionOpen, setConnectionOpen] = useState<boolean>(false);
   const [messageBody, setMessageBody] = useState<string>("");
@@ -36,13 +63,12 @@ const ChatPage: React.FC = () => {
   };
 
   useEffect(() => {
-    console.log(import.meta.env.VITE_CHAT_ENDPOINT);
+    subscribeToPush(User.userId);
 
     ws.current = new WebSocket(import.meta.env.VITE_CHAT_ENDPOINT);
     ws.current.onopen = () => {
       console.log("Connection Opened");
       setConnectionOpen(true);
-
       ws.current?.send(JSON.stringify({ initial: true, room: roomname }));
       // setMessages([]);
     };

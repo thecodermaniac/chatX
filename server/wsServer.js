@@ -1,12 +1,18 @@
 import { WebSocketServer } from "ws";
 
-export default function createWebSocketServer(server) {
+export default function createWebSocketServer(server, webPush) {
+
+
   const group = {};
+  const subscriptions = {}
+
   function sendMessage(message, room) {
     group[room].forEach((user) => {
       user.ws.send(JSON.stringify(message));
     });
   }
+
+
   const WssServer = new WebSocketServer({ server }, () => {
     console.log("Websocket started");
   });
