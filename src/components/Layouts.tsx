@@ -4,126 +4,205 @@ import closeIcon from "../assets/close.png";
 import menuIcon from "../assets/menu.png";
 import CreateChatModal from "./CreateChatModal";
 import useUser from "../context/UserProvider";
-import { getNames } from "../utils/getName";
-import useAxios from "../useAxios";
+import api from "../services/api"; // Use your configured Axios instance
 import UserSection from "./UserSection";
-import modalReducers from "../reducers/layModalReducers";
+import modalReducers, { LayoutState } from "../reducers/layModalReducers";
 import RequestChatModal from "./RequestModal";
 import RequestDropDown from "./RequestDropDown";
+
+// Define what a list item looks like
+interface ChatListItem {
+  id: number | string; // ID for groups, ID for friends
+  name: string;        // Display Name or Group Name
+  uniqueTag: string;   // userTag (for friends) or string ID (for groups)
+  type: "FRIEND" | "GROUP";
+}
+
+interface LayoutProps {
+  children: React.ReactNode;
+}
 
 const Layouts: React.FC<LayoutProps> = ({ children }) => {
   const { User, setReceiver } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
+
   const [{ isSideBarOpen, isChatOpen, isRequestOpen }, modalDispatch] =
-    useReducer<(state: any, actions: any) => any>(modalReducers, {
+    useReducer(modalReducers, {
       isSideBarOpen: true,
       isChatOpen: false,
       isRequestOpen: false,
     });
-  const [rooms, setRoom] = useState([{ name: "Global", value: "global" }]);
-  function navigateToChat(roomName: string) {
-    navigate(`/chat/${User.userName}/${roomName}`);
+
+  const [chatList, setChatList] = useState<ChatListItem[]>([]);
+
+  // Navigate to the chat page
+  function navigateToChat(item: ChatListItem) {
+    if (item.type === "FRIEND") {
+      // For friends, we use their userTag (e.g., aritra123)
+      navigate(`/chat/${item.uniqueTag}/private`);
+    } else {
+      // For groups, we might need a specific route, or we handle it in ChatPage
+      // For now, let's pass the Group ID as the "roomname"
+      // NOTE: You might need to update ChatPage to handle numeric Group IDs
+      navigate(`/chat/${item.id}/group`);
+    }
   }
 
-  function newChat(roomName: string) {
-    setRoom([...rooms, { name: roomName, value: roomName.toLowerCase() }]);
-  }
-
+  // Fetch Friends and Groups on mount
   useEffect(() => {
-    useAxios
-      .get(`/api/user/get-connection/${User.userId}`)
-      .then(function (response) {
-        console.log(response.data);
-        const userList = getNames(response.data.list, User.userName);
-        console.log(userList);
-        setRoom([...rooms, ...userList]);
-      });
-  }, []);
+    const fetchData = async () => {
+      try {
+        // Run both requests in parallel
+        const [friendsRes, groupsRes] = await Promise.all([
+          api.get("/friends/list"),
+          api.get("/groups"),
+        ]);
+
+        // 1. Process Friends
+        const friendItems: ChatListItem[] = friendsRes.data.map((f: any) => ({
+          id: f.id,
+          name: f.displayName || f.userTag,
+          uniqueTag: f.userTag,
+          type: "FRIEND",
+        }));
+
+        // 2. Process Groups
+        const groupItems: ChatListItem[] = groupsRes.data.map((g: any) => ({
+          id: g.id,
+          name: g.name,
+          uniqueTag: g.id.toString(),
+          type: "GROUP",
+        }));
+
+        // Combine them (Groups first, then Friends, or however you prefer)
+        setChatList([...groupItems, ...friendItems]);
+      } catch (error) {
+        console.error("Error fetching chat list:", error);
+      }
+    };
+
+    if (User?.userTag) {
+      fetchData();
+    }
+  }, [User]);
+
   return (
-    <div className="w-full h-[100vh] flex flex-col items-center space-y-6">
-      <nav className="flex justify-between w-full items-center">
-        <h2 className="text-3xl font-bold mx-auto">ChatX</h2>
-        <RequestDropDown />
-        <UserSection />
+    <div className="w-full h-[100vh] flex flex-col items-center space-y-6 bg-gray-50 text-gray-800">
+      {/* Navbar */}
+      <nav className="flex justify-between w-full items-center p-4 bg-white shadow-sm z-30">
+        <div className="flex items-center gap-4">
+          {location.pathname !== "/" && (
+            <img
+              src={menuIcon}
+              className="w-6 h-6 cursor-pointer hover:opacity-70"
+              onClick={() => {
+                modalDispatch({ type: "changeSidebar", payload: true });
+              }}
+              alt="Menu"
+            />
+          )}
+          <h2 className="text-3xl font-bold text-purple-600">ChatX</h2>
+        </div>
+        
+        <div className="flex flex-row items-center gap-4">
+            <RequestDropDown />
+            <UserSection  />
+        </div>
       </nav>
+
+      {/* Modals */}
       <CreateChatModal
-        createChat={newChat}
+        createChat={(val: any) => console.log("Create Group logic here", val)} 
         setModal={modalDispatch}
         openModal={isChatOpen}
       />
       <RequestChatModal setModal={modalDispatch} openModal={isRequestOpen} />
-      {location.pathname !== "/" && (
-        <img
-          src={menuIcon}
-          className="w-6 h-6 absolute top-3 left-4 z-10"
-          onClick={() => {
-            modalDispatch({ type: "changeSidebar", payload: true });
-          }}
-        />
-      )}
+
+      {/* Sidebar */}
       {location.pathname !== "/" && (
         <div
-          className={`fixed h-screen left-0 transition-all overflow-hidden z-20 bg-white border-r-4 rounded-xl ${
+          className={`fixed h-screen left-0 top-0 transition-all duration-300 ease-in-out z-40 bg-white border-r shadow-2xl ${
             isSideBarOpen
-              ? "lg:w-[20%] md:w-[40%] w-[60%] px-4"
-              : "w-0 border-r-0 px-0"
+              ? "lg:w-[20%] md:w-[40%] w-[75%] px-4"
+              : "w-0 px-0 border-none overflow-hidden"
           }`}
         >
-          <img
-            src={closeIcon}
-            className="absolute w-7 h-7 right-4 mb-4 hover:cursor-pointer"
-            onClick={() => {
-              modalDispatch({ type: "changeSidebar", payload: false });
-            }}
-          />
-          <div className="flex flex-col gap-3 divide-y-2 mt-6">
-            {rooms.map((val, ind) => {
+          {/* Close Icon */}
+          <div className="flex justify-end pt-4">
+            <img
+              src={closeIcon}
+              className="w-7 h-7 cursor-pointer hover:rotate-90 transition-transform"
+              onClick={() => {
+                modalDispatch({ type: "changeSidebar", payload: false });
+              }}
+              alt="Close"
+            />
+          </div>
+
+          {/* Chat List */}
+          <h3 className="text-gray-400 font-bold uppercase text-xs mt-4 mb-2">Your Chats</h3>
+          <div className="flex flex-col gap-2 overflow-y-auto h-[60vh] mt-2">
+            {chatList.length === 0 && <p className="text-center text-gray-400 mt-10">No chats yet.</p>}
+            
+            {chatList.map((chat, ind) => {
               return (
                 <div
-                  className="w-full px-2 py-3 flex flex-row items-center justify-between"
+                  className="w-full px-3 py-3 flex flex-row items-center gap-3 hover:bg-purple-50 rounded-xl cursor-pointer transition-colors"
                   key={ind}
                   onClick={() => {
-                    navigateToChat(val.value);
-                    setReceiver(val.name);
+                    navigateToChat(chat);
+                    setReceiver(chat.name); // Updates Context
+                    // On Mobile: Close sidebar after selection
+                    if (window.innerWidth < 768) {
+                        modalDispatch({ type: "changeSidebar", payload: false });
+                    }
                   }}
                 >
-                  <p className=" rounded-[100%] bg-cyan-900 w-10 h-10 text-white flex items-center justify-center">
-                    {val.name[0]}
+                  <p
+                    className={`rounded-full w-10 h-10 text-white flex items-center justify-center font-bold text-sm shadow-md ${
+                        chat.type === 'GROUP' ? 'bg-orange-500' : 'bg-purple-600'
+                    }`}
+                  >
+                    {chat.name[0].toUpperCase()}
                   </p>
-                  <p className="p-1">{val.name}</p>
+                  <div className="flex flex-col">
+                    <p className="font-semibold text-gray-700">{chat.name}</p>
+                    <span className="text-[10px] text-gray-400 uppercase tracking-wider">{chat.type}</span>
+                  </div>
                 </div>
               );
             })}
           </div>
-          <div className="flex flex-row w-full mt-5 gap-3">
+
+          {/* Action Buttons */}
+          <div className="absolute bottom-5 left-0 w-full px-4 flex flex-col gap-3">
             <button
-              className="flex-1 py-3 border-4 border-gray-500 rounded-xl"
+              className="w-full py-3 bg-purple-100 text-purple-700 font-bold rounded-xl hover:bg-purple-200 transition-colors"
               onClick={() => {
                 modalDispatch({ type: "changeChat", payload: true });
               }}
             >
-              New Chat +
+              Create Group +
             </button>
             <button
-              className="flex-1 py-3 border-4 border-gray-500 rounded-xl"
+              className="w-full py-3 border-2 border-purple-500 text-purple-600 font-bold rounded-xl hover:bg-purple-50 transition-colors"
               onClick={() => {
                 modalDispatch({ type: "changeRequest", payload: true });
               }}
             >
-              Send Request
+              Add Friend
             </button>
           </div>
         </div>
       )}
 
-      {children}
+      {/* Main Content (ChatPage) */}
+      <div className={`flex-1 w-full ${isSideBarOpen ? 'md:pl-0' : ''}`}>
+          {children}
+      </div>
     </div>
   );
 };
 
 export default Layouts;
-
-interface LayoutProps {
-  children: any;
-}

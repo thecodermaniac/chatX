@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import ChatPage from "./pages/ChatPage";
 import { UserProvider } from "./context/UserProvider";
@@ -10,12 +10,18 @@ const App = () => {
     <UserProvider>
       <BrowserRouter>
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+
+          {/* Protected Routes */}
           <Route element={<ProtectionRoute />}>
-            <Route path="/chat/:username/:roomname" element={<ChatPage />} />
-            <Route path="/chat/:username/:*" element={<ChatPage />} />
+            <Route path="/chat/:roomId/:chatType" element={<ChatPage />} />
           </Route>
+
+          {/* 404 Catch-All: Redirect unknown URLs to Login */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+          
         </Routes>
       </BrowserRouter>
     </UserProvider>
