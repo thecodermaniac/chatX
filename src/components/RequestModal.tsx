@@ -1,62 +1,94 @@
 import React, { useState } from "react";
 import closeIcon from "../assets/close.png";
-import useAxios from "../useAxios";
-import useUser from "../context/UserProvider";
+import api from "../services/api"; // Use new API instance
 
-const RequestChatModal: React.FC<RequestModal> = ({ openModal, setModal }) => {
-  const { User } = useUser();
-  const [userId, setId] = useState("");
+interface RequestModalProps {
+  openModal: boolean;
+  setModal: any; // Using 'any' to match your reducer dispatch type
+}
+
+const RequestChatModal: React.FC<RequestModalProps> = ({ openModal, setModal }) => {
+  const [targetUserTag, setTargetUserTag] = useState("");
+  const [loading, setLoading] = useState(false);
+
   function sentRequest() {
-    useAxios
-      .post("/api/user/add-connection", {
-        sender: User?.userId,
-        receiver: userId,
-      })
-      .then(function () {
-        alert("Request Sent");
+    if(!targetUserTag.trim()) return;
+
+    setLoading(true);
+
+    // POST /api/v1/friends/send/{targetUserTag}
+    // We don't need to send a body, the URL contains the target
+    api.post(`/friends/send/${targetUserTag}`)
+      .then(function (response) {
+        alert(response.data); // "Friend request successfully sent..."
+        setModal({ type: "changeRequest", payload: false });
+        setTargetUserTag("");
       })
       .catch(function (error) {
-        alert(error.message);
+        // Backend returns helpful error messages (e.g. "User not found")
+        const msg = error.response?.data || error.message;
+        alert("Error: " + msg);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }
+
+  // Close handler
+  const handleClose = () => {
+    setModal({ type: "changeRequest", payload: false });
+    setTargetUserTag("");
+  };
+
   return (
     <div
-      className={`absolute top-[50%] left-[50%] bg-white py-3 transition-all border-2 rounded-lg px-4 translate-x-[-50%] translate-y-[-50%] z-60 ${
-        openModal ? "scale-100" : "scale-0"
+      className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300 ${
+        openModal ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
       }`}
     >
-      <img
-        src={closeIcon}
-        className="absolute top-2 right-2 w-6 h-6 hover:cursor-pointer"
-        onClick={() => {
-          setModal({ type: "changeRequest", payload: false });
-        }}
-      />
-      <p className="text-lg">Sent Request</p>
-      <input
-        value={userId}
-        className="w-full px-2 py-1 border-2 my-4 rounded-lg"
-        onChange={(e) => {
-          setId(e.target.value);
-        }}
-      />
-      <button
-        className="bg-blue-500 w-full px-3 py-1 rounded-full mx-auto my-3 text-white"
-        onClick={() => {
-          sentRequest();
-          setModal({ type: "changeRequest", payload: false });
-          setId("");
-        }}
-      >
-        Send
-      </button>
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black bg-opacity-40 backdrop-blur-sm"
+        onClick={handleClose}
+      ></div>
+
+      {/* Modal Content */}
+      <div className={`bg-white w-full max-w-sm rounded-xl shadow-2xl p-6 relative transform transition-transform duration-300 ${
+         openModal ? "scale-100" : "scale-90"
+      }`}>
+        
+        <img
+          src={closeIcon}
+          className="absolute top-4 right-4 w-6 h-6 cursor-pointer hover:opacity-70"
+          onClick={handleClose}
+          alt="Close"
+        />
+
+        <h3 className="text-xl font-bold text-gray-800 mb-2">Add a Friend</h3>
+        <p className="text-sm text-gray-500 mb-4">Enter the User Tag of the person you want to connect with.</p>
+        
+        <input
+          value={targetUserTag}
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-shadow"
+          placeholder="e.g. aritra123"
+          onChange={(e) => setTargetUserTag(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && sentRequest()}
+        />
+
+        <button
+          className={`w-full py-3 rounded-lg mt-6 text-white font-bold transition-all ${
+            loading 
+              ? "bg-purple-300 cursor-not-allowed" 
+              : "bg-purple-600 hover:bg-purple-700 shadow-lg hover:shadow-xl"
+          }`}
+          onClick={sentRequest}
+          disabled={loading}
+        >
+          {loading ? "Sending..." : "Send Request"}
+        </button>
+      </div>
     </div>
   );
 };
 
 export default RequestChatModal;
-
-interface RequestModal {
-  openModal: boolean;
-  setModal: any;
-}
